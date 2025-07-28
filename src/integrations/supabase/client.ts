@@ -1,9 +1,27 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// Use placeholder values for development when real Supabase credentials aren't available
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder'
+// Check if we have real Supabase credentials
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Create client with placeholder values for development
-// This prevents the app from crashing when Supabase credentials aren't configured
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create a mock client for development when Supabase isn't configured
+const createMockSupabaseClient = (): any => ({
+  auth: {
+    getSession: async () => ({ data: { session: null }, error: null }),
+    signInWithPassword: async () => ({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+    signUp: async () => ({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+    signOut: async () => ({ error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+  },
+  from: () => ({
+    select: () => ({ data: [], error: null }),
+    insert: () => ({ data: null, error: { message: 'Supabase not configured' } }),
+    update: () => ({ data: null, error: { message: 'Supabase not configured' } }),
+    delete: () => ({ data: null, error: { message: 'Supabase not configured' } })
+  })
+});
+
+// Export either real or mock client
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : createMockSupabaseClient();
