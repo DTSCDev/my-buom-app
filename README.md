@@ -30,8 +30,8 @@ A React TypeScript application for calculating retirement savings shortfalls and
 
 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/free-retirement-calculator.git
-cd free-retirement-calculator
+git clone https://github.com/DTSCDev/my-buom-app.git
+cd my-buom-app
 ```
 
 2. Install dependencies

@@ -37,10 +37,10 @@ git config --global user.email "your.email@example.com"
 2. **Create New Repository:**
    - Click the "+" icon in the top right
    - Select "New repository"
-   - Repository name: `free-retirement-calculator` (or your preferred name)
-   - Description: "Free Retirement Savings Calculator - React TypeScript app for pension planning"
+   - Repository name: `my-buom-app`
+   - Description: "BUOM Free Retirement Savings Calculator - React TypeScript app for pension planning"
    - Choose "Public" or "Private"
-   - **DO NOT** initialize with README, .gitignore, or license (we already have these files)
+   - **Note:** Repository already created at https://github.com/DTSCDev/my-buom-app.git
    - Click "Create repository"
 
 ## Step 4: Initialize Local Git Repository and Push to GitHub
@@ -58,10 +58,11 @@ git add .
 # Create initial commit
 git commit -m "Initial commit: Free Retirement Calculator setup"
 
-# Add remote GitHub repository (replace YOUR_USERNAME and REPO_NAME)
-git remote add origin https://github.com/YOUR_USERNAME/REPO_NAME.git
+# Add remote GitHub repository
+git remote add origin https://github.com/DTSCDev/my-buom-app.git
 
-# Push to GitHub
+# Rename branch to main and push to GitHub
+git branch -M main
 git push -u origin main
 ```
 
