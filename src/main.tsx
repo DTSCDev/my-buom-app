@@ -1,7 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
-import './index.css'
+// Temporarily comment out CSS to test if that's causing issues
+// import './index.css'
+
+console.log('main.tsx is loading...');
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
