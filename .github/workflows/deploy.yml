@@ -40,21 +40,26 @@ jobs:
         # Create a new branch for deployment
         git checkout -b deployment
         
-        # Copy ALL built files directly to root (cPanel serves from repo root)
+        # Remove everything first
+        find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '..' -exec rm -rf {} +
+        
+        # Copy built files directly to root of deployment branch
         cp -r dist/* .
         
-        # Copy favicon and other public files to root
-        if [ -d "public" ]; then
-          cp -r public/* . 2>/dev/null || true
+        # Copy favicon to root
+        if [ -f "public/favicon.ico" ]; then
+          cp public/favicon.ico .
         fi
         
-        # Create .htaccess for proper routing
-        echo "DirectoryIndex index.html" > .htaccess
-        echo "Options -Indexes" >> .htaccess
-        echo "RewriteEngine On" >> .htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> .htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> .htaccess
-        echo "RewriteRule . /index.html [L]" >> .htaccess
+        # Create .htaccess for SPA routing
+        cat > .htaccess << 'EOF'
+DirectoryIndex index.html
+Options -Indexes
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /my-buom-app/index.html [L]
+EOF
         
         # Add built files to git
         git add -A
