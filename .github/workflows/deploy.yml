@@ -1,5 +1,6 @@
 name: Deploy to cPanel
 # Fixed dependency issue - removed invalid @radix-ui/react-sheet package
+# Fixed FTP timeout - using airvzxf/ftp-deployment-action
 
 on:
   push:
@@ -31,11 +32,11 @@ jobs:
     - name: List build files
       run: ls -la dist/
       
-    - name: Deploy via FTP
-      uses: sebastianpopp/ftp-action@releases/v2
+    - name: Deploy via FTP  
+      uses: airvzxf/ftp-deployment-action@latest
       with:
-        host: ftp.buom.app
+        server: ftp.buom.app
         user: my-buom-app@sids.buom.app
         password: ${{ secrets.FTP_PASSWORD }}
-        localDir: "dist"
-        remoteDir: "/public_html"
+        local_dir: "./dist/"
+        remote_dir: "/public_html/"
