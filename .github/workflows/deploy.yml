@@ -52,14 +52,12 @@ jobs:
         fi
         
         # Create .htaccess for SPA routing
-        cat > .htaccess << 'EOF'
-DirectoryIndex index.html
-Options -Indexes
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /my-buom-app/index.html [L]
-EOF
+        echo "DirectoryIndex index.html" > .htaccess
+        echo "Options -Indexes" >> .htaccess
+        echo "RewriteEngine On" >> .htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> .htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> .htaccess
+        echo "RewriteRule . /my-buom-app/index.html [L]" >> .htaccess
         
         # Add built files to git
         git add -A
