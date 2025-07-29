@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Retirement Savings Calculator</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        input:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.25); }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background: #0056b3; }
+        .result { background: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 6px; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        h1 { color: #2c3e50; margin-bottom: 30px; text-align: center; }
+        h2 { color: #34495e; margin-bottom: 20px; }
+        .large-text { font-size: 24px; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function Calculator() {
+            const [currentAge, setCurrentAge] = React.useState('');
+            const [retirementAge, setRetirementAge] = React.useState('');
+            const [monthlyContribution, setMonthlyContribution] = React.useState('');
+            const [currentSavings, setCurrentSavings] = React.useState('');
+            const [expectedReturn, setExpectedReturn] = React.useState('7');
+            const [result, setResult] = React.useState(null);
+
+            const calculateRetirement = () => {
+                const age = parseInt(currentAge);
+                const retAge = parseInt(retirementAge);
+                const monthly = parseFloat(monthlyContribution);
+                const current = parseFloat(currentSavings) || 0;
+                const rate = parseFloat(expectedReturn) / 100;
+
+                if (age >= retAge) {
+                    alert('Retirement age must be greater than current age');
+                    return;
+                }
+
+                const years = retAge - age;
+                const monthlyRate = rate / 12;
+                const totalMonths = years * 12;
+
+                // Future value of current savings
+                const futureCurrentSavings = current * Math.pow(1 + rate, years);
+
+                // Future value of monthly contributions (annuity)
+                let futureContributions = 0;
+                if (monthlyRate > 0) {
+                    futureContributions = monthly * (Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate;
+                } else {
+                    futureContributions = monthly * totalMonths;
+                }
+
+                const totalSavings = futureCurrentSavings + futureContributions;
+                const totalContributions = current + (monthly * totalMonths);
+
+                setResult({
+                    totalSavings: totalSavings,
+                    totalContributions: totalContributions,
+                    years: years
+                });
+            };
+
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            return (
+                <div className="container">
+                    <h1>Free Retirement Savings Calculator</h1>
+                    
+                    <div className="card">
+                        <h2>Your Information</h2>
+                        <div className="grid">
+                            <div className="form-group">
+                                <label>Current Age</label>
+                                <input
+                                    type="number"
+                                    value={currentAge}
+                                    onChange={(e) => setCurrentAge(e.target.value)}
+                                    placeholder="25"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Retirement Age</label>
+                                <input
+                                    type="number"
+                                    value={retirementAge}
+                                    onChange={(e) => setRetirementAge(e.target.value)}
+                                    placeholder="65"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="grid">
+                            <div className="form-group">
+                                <label>Monthly Contribution ($)</label>
+                                <input
+                                    type="number"
+                                    value={monthlyContribution}
+                                    onChange={(e) => setMonthlyContribution(e.target.value)}
+                                    placeholder="500"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Current Savings ($)</label>
+                                <input
+                                    type="number"
+                                    value={currentSavings}
+                                    onChange={(e) => setCurrentSavings(e.target.value)}
+                                    placeholder="10000"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label>Expected Annual Return (%)</label>
+                            <input
+                                type="number"
+                                step="0.1"
+                                value={expectedReturn}
+                                onChange={(e) => setExpectedReturn(e.target.value)}
+                                placeholder="7"
+                            />
+                        </div>
+                        
+                        <button onClick={calculateRetirement}>
+                            Calculate My Retirement Savings
+                        </button>
+                    </div>
+
+                    {result && (
+                        <div className="card">
+                            <h2>Your Retirement Projection</h2>
+                            <div className="result">
+                                <div style={{marginBottom: '15px'}}>
+                                    <strong>After {result.years} years, you will have:</strong>
+                                </div>
+                                <div className="large-text" style={{marginBottom: '20px'}}>
+                                    {formatCurrency(result.totalSavings)}
+                                </div>
+                                <div style={{fontSize: '14px', color: '#666'}}>
+                                    Total contributions: {formatCurrency(result.totalContributions)}<br/>
+                                    Investment growth: {formatCurrency(result.totalSavings - result.totalContributions)}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Calculator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
