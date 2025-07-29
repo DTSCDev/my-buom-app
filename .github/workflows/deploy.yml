@@ -2,9 +2,8 @@ name: Deploy to cPanel
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -18,31 +17,24 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install dependencies
-      run: |
-        npm ci --prefer-offline --no-audit --no-fund
-        
+      run: npm install --legacy-peer-deps
+      
     - name: Build application
       run: npm run build
       env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        VITE_SUPABASE_URL: https://yacaebicwatkntvvobsn.supabase.co
+        VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhY2FlYmljd2F0a250dnZvYnNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTI2NjMsImV4cCI6MjA2OTI4ODY2M30.opm419ZQV_6BlJA-ArexehJM-n-Rhkpbjk-z6KIcDO8
         
-    - name: Deploy to cPanel via FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-      timeout-minutes: 10
+    - name: List build files
+      run: ls -la dist/
+      
+    - name: Deploy via FTP
+      uses: sebastianpopp/ftp-action@releases/v2
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
+        host: ftp.buom.app
+        user: my-buom-app@sids.buom.app
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./dist/
-        server-dir: /public_html/
-        state-name: .ftp-deploy-sync-state.json
-        dry-run: false
-        log-level: verbose
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
+        localDir: "dist"
+        remoteDir: "/public_html"
