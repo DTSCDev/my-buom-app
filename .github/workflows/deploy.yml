@@ -1,6 +1,6 @@
 name: Deploy to cPanel
 # Fixed dependency issue - removed invalid @radix-ui/react-sheet package
-# Fixed FTP timeout - using SamKirkland FTP action with proper directory structure
+# Using lftp for direct FTP deployment to ensure files go to root directory
 
 on:
   push:
@@ -32,15 +32,16 @@ jobs:
     - name: List build files
       run: ls -la dist/
       
-    - name: Deploy via FTP  
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ftp.buom.app
-        username: my-buom-app@sids.buom.app
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: "./dist/"
-        server-dir: "/public_html/"
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/node_modules/**
+    - name: Install lftp
+      run: sudo apt-get update && sudo apt-get install -y lftp
+      
+    - name: Deploy via FTP
+      run: |
+        lftp -c "
+        open ftp://ftp.buom.app
+        user my-buom-app@sids.buom.app ${{ secrets.FTP_PASSWORD }}
+        lcd dist
+        cd public_html
+        mirror --reverse --delete --verbose --exclude-glob .git*
+        bye
+        "
