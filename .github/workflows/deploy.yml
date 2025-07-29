@@ -1,6 +1,6 @@
 name: Deploy to cPanel
 # Fixed dependency issue - removed invalid @radix-ui/react-sheet package
-# Using lftp for direct FTP deployment to ensure files go to root directory
+# Using lftp with SSL disabled to avoid certificate verification issues
 
 on:
   push:
@@ -38,7 +38,9 @@ jobs:
     - name: Deploy via FTP
       run: |
         lftp -c "
-        open ftp://ftp.buom.app
+        set ftp:ssl-allow no
+        set ssl:verify-certificate no
+        open ftp://ftp.buom.app:21
         user my-buom-app@sids.buom.app ${{ secrets.FTP_PASSWORD }}
         lcd dist
         cd public_html
