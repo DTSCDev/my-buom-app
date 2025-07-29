@@ -44,6 +44,11 @@ jobs:
         mkdir -p my-buom-app
         cp -r dist/* my-buom-app/
         
+        # Copy public files (including favicon) to my-buom-app directory
+        if [ -d "public" ]; then
+          cp -r public/* my-buom-app/ 2>/dev/null || true
+        fi
+        
         # Create .htaccess in root for subdirectory routing
         echo "RewriteEngine On" > .htaccess
         echo "RewriteRule ^my-buom-app/(.*)$ my-buom-app/$1 [L]" >> .htaccess
