@@ -1,6 +1,5 @@
-name: Deploy to cPanel
-# Fixed dependency issue - removed invalid @radix-ui/react-sheet package
-# Using simple curl FTP commands to avoid stuck deployments
+name: Deploy to cPanel via Git
+# Create deployment branch with built files for cPanel Git deployment
 
 on:
   push:
@@ -29,20 +28,22 @@ jobs:
         VITE_SUPABASE_URL: https://yacaebicwatkntvvobsn.supabase.co
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhY2FlYmljd2F0a250dnZvYnNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MTI2NjMsImV4cCI6MjA2OTI4ODY2M30.opm419ZQV_6BlJA-ArexehJM-n-Rhkpbjk-z6KIcDO8
         
-    - name: List build files
-      run: ls -la dist/
-      
-    - name: Deploy via FTP using curl
+    - name: Prepare deployment files
       run: |
-        cd dist
-        echo "Uploading index.html..."
-        curl -T "index.html" ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/
+        # Create deployment branch with built files
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
         
-        echo "Uploading all files..."
-        find . -type f -name "*.js" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
-        find . -type f -name "*.css" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
-        find . -type f -name "*.png" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
-        find . -type f -name "*.jpg" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
-        find . -type f -name "*.ico" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        # Create a new branch for deployment
+        git checkout -b deployment
         
-        echo "Deployment completed!"
+        # Copy built files to root (cPanel will serve from repository root)
+        cp -r dist/* .
+        
+        # Add built files to git
+        git add -A
+        git commit -m "Deploy built files" || echo "No changes to commit"
+        
+    - name: Push to deployment branch
+      run: |
+        git push origin deployment --force
