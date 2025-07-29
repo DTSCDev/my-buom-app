@@ -40,26 +40,21 @@ jobs:
         # Create a new branch for deployment
         git checkout -b deployment
         
-        # Create my-buom-app directory structure for cPanel
-        mkdir -p my-buom-app
-        cp -r dist/* my-buom-app/
+        # Copy ALL built files directly to root (cPanel serves from repo root)
+        cp -r dist/* .
         
-        # Copy public files (including favicon) to my-buom-app directory
+        # Copy favicon and other public files to root
         if [ -d "public" ]; then
-          cp -r public/* my-buom-app/ 2>/dev/null || true
+          cp -r public/* . 2>/dev/null || true
         fi
         
-        # Create .htaccess in root for subdirectory routing
-        echo "RewriteEngine On" > .htaccess
-        echo "RewriteRule ^my-buom-app/(.*)$ my-buom-app/$1 [L]" >> .htaccess
-        
-        # Create .htaccess in my-buom-app directory
-        echo "DirectoryIndex index.html" > my-buom-app/.htaccess
-        echo "Options -Indexes" >> my-buom-app/.htaccess
-        echo "RewriteEngine On" >> my-buom-app/.htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> my-buom-app/.htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> my-buom-app/.htaccess
-        echo "RewriteRule . /my-buom-app/index.html [L]" >> my-buom-app/.htaccess
+        # Create .htaccess for proper routing
+        echo "DirectoryIndex index.html" > .htaccess
+        echo "Options -Indexes" >> .htaccess
+        echo "RewriteEngine On" >> .htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> .htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> .htaccess
+        echo "RewriteRule . /index.html [L]" >> .htaccess
         
         # Add built files to git
         git add -A
