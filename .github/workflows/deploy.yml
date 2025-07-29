@@ -33,35 +33,39 @@ jobs:
         
     - name: Prepare deployment files
       run: |
-        # Create deployment branch with built files
+        # Verify build completed successfully
+        if [ ! -d "dist" ]; then
+          echo "Build failed - dist directory not found"
+          exit 1
+        fi
+        
+        # Configure git
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         
-        # Create a new branch for deployment
+        # Create deployment branch from current state
         git checkout -b deployment
         
-        # Remove everything first
-        find . -maxdepth 1 ! -name '.git' ! -name '.' ! -name '..' -exec rm -rf {} +
+        # Clear everything except .git and dist
+        find . -maxdepth 1 ! -name '.git' ! -name 'dist' ! -name '.' ! -name '..' -exec rm -rf {} +
         
-        # Copy built files directly to root of deployment branch
-        cp -r dist/* .
+        # Move dist contents to root
+        mv dist/* .
+        rmdir dist
         
-        # Copy favicon to root
-        if [ -f "public/favicon.ico" ]; then
-          cp public/favicon.ico .
-        fi
+        # Add .htaccess for subdirectory routing
+        cat > .htaccess << 'EOL'
+        DirectoryIndex index.html
+        Options -Indexes
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . /my-buom-app/index.html [L]
+        EOL
         
-        # Create .htaccess for SPA routing
-        echo "DirectoryIndex index.html" > .htaccess
-        echo "Options -Indexes" >> .htaccess
-        echo "RewriteEngine On" >> .htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> .htaccess
-        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> .htaccess
-        echo "RewriteRule . /my-buom-app/index.html [L]" >> .htaccess
-        
-        # Add built files to git
-        git add -A
-        git commit -m "Deploy built files" || echo "No changes to commit"
+        # Commit deployment files
+        git add .
+        git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M:%S')"
         
     - name: Push to deployment branch
       run: |
