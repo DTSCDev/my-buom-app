@@ -1,6 +1,6 @@
 name: Deploy to cPanel
 # Fixed dependency issue - removed invalid @radix-ui/react-sheet package
-# Using lftp with SSL certificate verification disabled (Copilot suggestion)
+# Using simple curl FTP commands to avoid stuck deployments
 
 on:
   push:
@@ -32,17 +32,17 @@ jobs:
     - name: List build files
       run: ls -la dist/
       
-    - name: Install lftp
-      run: sudo apt-get update && sudo apt-get install -y lftp
-      
-    - name: Deploy via FTP
+    - name: Deploy via FTP using curl
       run: |
-        lftp -c "
-        set ssl:verify-certificate no
-        open ftp://ftp.buom.app
-        user my-buom-app@sids.buom.app ${{ secrets.FTP_PASSWORD }}
-        lcd dist
-        cd public_html
-        mirror --reverse --delete --verbose --exclude-glob .git*
-        bye
-        "
+        cd dist
+        echo "Uploading index.html..."
+        curl -T "index.html" ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/
+        
+        echo "Uploading all files..."
+        find . -type f -name "*.js" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        find . -type f -name "*.css" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        find . -type f -name "*.png" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        find . -type f -name "*.jpg" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        find . -type f -name "*.ico" -exec curl --ftp-create-dirs -T {} ftp://my-buom-app@sids.buom.app:${{ secrets.FTP_PASSWORD }}@ftp.buom.app/public_html/{} \;
+        
+        echo "Deployment completed!"
