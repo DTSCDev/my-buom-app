@@ -40,12 +40,21 @@ jobs:
         # Create a new branch for deployment
         git checkout -b deployment
         
-        # Copy built files to root (cPanel will serve from repository root)
-        cp -r dist/* .
+        # Create my-buom-app directory structure for cPanel
+        mkdir -p my-buom-app
+        cp -r dist/* my-buom-app/
         
-        # Create .htaccess for subdirectory deployment
-        echo "DirectoryIndex index.html" > .htaccess
-        echo "Options -Indexes" >> .htaccess
+        # Create .htaccess in root for subdirectory routing
+        echo "RewriteEngine On" > .htaccess
+        echo "RewriteRule ^my-buom-app/(.*)$ my-buom-app/$1 [L]" >> .htaccess
+        
+        # Create .htaccess in my-buom-app directory
+        echo "DirectoryIndex index.html" > my-buom-app/.htaccess
+        echo "Options -Indexes" >> my-buom-app/.htaccess
+        echo "RewriteEngine On" >> my-buom-app/.htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-f" >> my-buom-app/.htaccess
+        echo "RewriteCond %{REQUEST_FILENAME} !-d" >> my-buom-app/.htaccess
+        echo "RewriteRule . /my-buom-app/index.html [L]" >> my-buom-app/.htaccess
         
         # Add built files to git
         git add -A
