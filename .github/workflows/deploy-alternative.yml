@@ -1,10 +1,9 @@
-name: Deploy to cPanel
+name: Deploy to sids.buom.app
 
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -18,10 +17,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
+        
+    - name: Clear npm cache
+      run: npm cache clean --force
         
     - name: Install dependencies
-      run: npm install --force
+      run: npm install --force --no-package-lock
       
     - name: Build application
       run: npm run build
@@ -29,11 +30,14 @@ jobs:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         
-    - name: Deploy to cPanel via FTP
+    - name: List build output
+      run: ls -la dist/
+        
+    - name: Deploy to FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
+        server: ftp.buom.app
+        username: my-buom-app@sids.buom.app
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./dist/
         server-dir: /public_html/
@@ -41,3 +45,4 @@ jobs:
           **/.git*
           **/.git*/**
           **/node_modules/**
+          **/.github/**
