@@ -10,4 +10,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    fs: {
+      // Restrict file serving to the project directory
+      strict: true,
+      allow: ['.']
+    }
+  },
+  optimizeDeps: {
+    // Only scan dependencies, not random HTML files
+    entries: ['index.html', 'src/**/*.{js,ts,jsx,tsx}']
+  }
 })
