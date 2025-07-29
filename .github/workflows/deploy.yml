@@ -40,6 +40,10 @@ jobs:
         # Copy built files to root (cPanel will serve from repository root)
         cp -r dist/* .
         
+        # Create .htaccess for subdirectory deployment
+        echo "DirectoryIndex index.html" > .htaccess
+        echo "Options -Indexes" >> .htaccess
+        
         # Add built files to git
         git add -A
         git commit -m "Deploy built files" || echo "No changes to commit"
