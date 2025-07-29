@@ -5,7 +5,7 @@ import path from "path"
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/my-buom-app/',
+  base: '/my-buom-app/my-buom-app/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
